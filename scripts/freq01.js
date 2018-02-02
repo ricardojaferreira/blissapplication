@@ -27,6 +27,7 @@ function statechange() {
         console.log('Body:', this.responseText);
         if(this.status == 200){
             loading.style.display = 'none';
+            window.location = "/blissapplication/question/";
         }else{
             if(this.status == 503){
                 loading.style.display = 'none';
