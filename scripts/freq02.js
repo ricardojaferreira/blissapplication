@@ -74,8 +74,23 @@ function con_timeout(){
 }
 
 /******** Get List Questions **********************/
-
+let detailScreen = document.querySelector('#detail-screen');
 let pathArray = window.location.href.split('?');
+if(pathArray.length>1) {
+    if (pathArray[1].includes('question_id=', 0)) {
+        let query = pathArray[1].split('=');
+        if(query.length>1){
+            if(/\D/.test(query[1])){
+                let questID = query[1].substr(0, /\D/.exec(query[1].substr(0)).index);
+                retrieveQuestion('GET', 'https://private-anon-14dd947258-blissrecruitmentapi.apiary-mock.com/questions/' + questID);
+            }
+            if(/\d/.test(query[1])){
+                let questID = query[1];
+                retrieveQuestion('GET', 'https://private-anon-14dd947258-blissrecruitmentapi.apiary-mock.com/questions/' + questID);
+            }
+        }
+    }
+}
 let questionFilter = document.querySelector('input#question_filter');
 let fetch = document.querySelector('button#fetch');
 let clearFilter = document.querySelector('button#clearFilter');
@@ -148,10 +163,108 @@ function populateList(list, quantity){
                 ulVotes.removeChild(ulVotes.firstChild);
             }
         });
-        liElement.innerHTML = '<a href="question/'+list[i].id+'">' +
-            '<span class="quest_id">'+list[i].id+'</span>' +
-            list[i].question +
-            '</a>'
+        let questLink = document.createElement('A');
+        questLink.href = list[i].id;
+        questLink.innerHTML = '<span class="quest_id">'+list[i].id+'</span>' + list[i].question;
+        questLink.addEventListener('click',function(event){
+           event.preventDefault();
+            retrieveQuestion('GET', 'https://private-anon-14dd947258-blissrecruitmentapi.apiary-mock.com/questions/' + event.href);
+
+        });
+        liElement.appendChild(questLink);
         ulContainer.appendChild(liElement);
     }
+}
+
+function retrieveQuestion(method, uri){
+    detailScreen.style.display = 'block';
+    let poll = document.querySelector('.question-poll');
+    poll.innerHTML = '<i class="fas fa-times"></i>';
+    let closeDetail = document.querySelector('#detail-screen .fa-times');
+    closeDetail.addEventListener('click', function(){
+        detailScreen.style.display = 'none';
+        let questionPoll = document.querySelector('.question-poll');
+        while(questionPoll.firstChild){
+            questionPoll.removeChild(questionPoll.firstChild);
+        }
+    });
+    let request = new XMLHttpRequest();
+    request.open(method, uri);
+
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            let response = JSON.parse(this.responseText);
+            let questName = document.createElement('H3');
+            questName.innerHTML = response.question;
+            let questID = document.createElement('INPUT');
+            questID.type = 'hidden';
+            questID.value = response.id;
+            questID.id = 'poll-question-id';
+            poll.appendChild(questID);
+            poll.appendChild(questName);
+            for(let i=0; i<response.choices.length; i++){
+                let answersContainer = document.createElement('DIV');
+                poll.appendChild(answersContainer);
+                let answers = document.createElement('INPUT');
+                let answersLabel = document.createElement('LABEL');
+                answers.type = 'radio';
+                answers.name = 'choices';
+                answers.id = response.choices[i].choice;
+                answers.value = response.choices[i].choice;
+                answersLabel.htmlFor = response.choices[i].choice;
+                answersLabel.innerHTML = response.choices[i].choice;
+                answersContainer.appendChild(answers);
+                answersContainer.appendChild(answersLabel);
+            }
+            let voteBtn = document.createElement('BUTTON');
+            voteBtn.innerHTML = 'Vote';
+            poll.appendChild(voteBtn);
+            voteBtn.addEventListener('click',updateQuestion);
+
+        }
+    };
+
+    request.send();
+}
+
+function updateQuestion(){
+    let questObj = {};
+    let questionID = document.querySelector('#poll-question-id');
+    let questionName = document.querySelector('.question-poll h3');
+    let questionContainers = document.querySelectorAll('#detail-screen .question-poll div');
+    let answers = document.querySelectorAll('input[name=choices]');
+    questObj.id = questionID.value;
+    questObj.image_url = 'https://dummyimage.com/600x400/000/fff.png&text=question+1+image+(600x400)'; //Not sure how to use this parameter
+    questObj.thumb_url = 'https://dummyimage.com/120x120/000/fff.png&text=question+1+image+(120x120)'; //Not sure how to use this parameter
+    questObj.question = questionName.innerHTML;
+    questObj.choices = [];
+    let checked = 0;
+    for(let i=0; i<answers.length; i++){
+        if(answers[i].checked){
+            checked = 1;
+        }
+        questObj.choices.push({choice: answers[i].value,votes: checked});
+    }
+
+    let request = new XMLHttpRequest();
+
+    request.open('PUT', 'https://private-anon-14dd947258-blissrecruitmentapi.apiary-mock.com/questions/'+
+                                                                                        questionID.value);
+
+    request.setRequestHeader('Content-Type', 'application/json');
+
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status===201 && checked!=0) {
+            questionContainers.forEach(function(element){
+                element.remove();
+            });
+            questionName.innerHTML="Thank you for Voting!"
+        }
+
+        if (this.readyState === 4 && this.status===400){
+            //ERROR MESSAGE GOES HERE
+        }
+    };
+
+    request.send(JSON.stringify(questObj));
 }

@@ -156,6 +156,21 @@ aside#question-votes .votes-number:before{
     content: ' - ';
 }
 
+/********* Question Details *************/
+
+.fa-times{
+    text-align: center;
+    font-size: 1.8em;
+    cursor: pointer;
+}
+
+.question-poll{
+    display: flex;
+    flex-direction: column;
+}
+
+/******** Question Details: END **************/
+
 footer{
     grid-column: left / right;
     grid-row: content-end / footer-end;
