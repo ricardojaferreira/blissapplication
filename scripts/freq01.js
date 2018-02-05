@@ -1,7 +1,5 @@
-
 'use strict'
 
-let dummy = document.querySelector('h1');
 let loading = document.querySelector('#loading-block');
 let retryBlock = document.querySelector('#retry-block');
 let retryButton = document.querySelector('#retryConnection');
@@ -27,7 +25,7 @@ function statechange() {
         console.log('Body:', this.responseText);
         if(this.status == 200){
             loading.style.display = 'none';
-            window.location = "/question";
+            window.location = "/questions";
         }else{
             if(this.status == 503){
                 loading.style.display = 'none';

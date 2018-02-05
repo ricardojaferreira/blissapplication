@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List Screen</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link rel="stylesheet" href="styles/reset.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="scripts/freq02.js" defer></script>
+</head>
+<body>
+
+<div id="loading-block" class="modal">
+    <div>
+        <img src="images/loading.gif" title="loading image">
+    </div>
+</div>
+
+<header>
+    <h1>List Screen</h1>
+    <div id="filter-area">
+        <input type="text" name="question-filter" id="question_filter" placeholder="Question Filter">
+        <button id="fetch">Filter</button>
+        <button id="clearFilter">Clear</button>
+    </div>
+</header>
+
+<aside id="server-health">
+    <h4>Server Health</h4>
+    <p>Status: <span class="statusOK">OK</span></p>
+    <p>Last Check At: </p>
+    <button class="check-health">Check Again</button>
+</aside>
+
+<div id="list-items">
+    <ul class="records">
+    </ul>
+</div>
+
+<aside id="question-votes">
+    <h4>Votes so far:</h4>
+    <p>Mouse Over on each item.</p>
+    <ul class="votes">
+    </ul>
+</aside>
+
+<footer><p>&copy; 2017 All rights reserved</p></footer>
+
+</body>
+</html>
